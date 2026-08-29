@@ -1,0 +1,26 @@
+{
+  "sample_rate": 48000,
+  "block_size": 256,
+  "voice_cap": 32,
+  "buses": ["ui", "sfx", "dialogue", "music", "ambience", "crowd", "commentary", "master"],
+  "snapshots": {
+    "normal": { "music": 0.0, "sfx": 0.0, "dialogue": 0.0 },
+    "check": { "music": -2.0, "sfx": 1.5 },
+    "victory": { "music": 2.0, "sfx": -1.0 },
+    "broadcast_focus": { "music": -8.0, "sfx": -4.0, "crowd": -2.0, "commentary": 2.0 }
+  },
+  "events": {
+    "ui.click": { "bus": "ui", "gain_db": -12, "spatial": false, "synth": "click" },
+    "ui.error": { "bus": "ui", "gain_db": -8, "spatial": false, "synth": "error" },
+    "sfx.piece.select": { "bus": "sfx", "gain_db": -10, "spatial": true, "synth": "tick" },
+    "sfx.piece.move": { "bus": "sfx", "gain_db": -8, "spatial": true, "synth": "wood" },
+    "sfx.piece.capture": { "bus": "sfx", "gain_db": -4, "spatial": true, "synth": "hit" },
+    "sfx.check": { "bus": "sfx", "gain_db": -2, "spatial": false, "synth": "sting" },
+    "sfx.mate": { "bus": "sfx", "gain_db": 0, "spatial": false, "synth": "fanfare" },
+    "vo.announce.check": { "bus": "dialogue", "gain_db": -6, "spatial": false, "synth": "voice" },
+    "music.state.explore": { "bus": "music", "gain_db": -16, "spatial": false, "loop": true, "synth": "pad" },
+    "ambience.hall": { "bus": "ambience", "gain_db": -22, "spatial": false, "loop": true, "synth": "noise" },
+    "crowd.cheer": { "bus": "crowd", "gain_db": -10, "spatial": false, "synth": "cheer" },
+    "broadcast.comment.play": { "bus": "commentary", "gain_db": -4, "spatial": false, "synth": "voice" }
+  }
+}
