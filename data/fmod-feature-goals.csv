@@ -1,0 +1,5 @@
+Goal,FMOD Feature,Implementation Tip
+Maintain clarity during crowd peaks,Mixer snapshots + ducking,Auto-duck commentary when crowd volume rises
+Dynamic music transitions,Parameter-driven adaptive music,Use vertical layering and horizontal resequencing
+Real-time feedback,Live Update mode,Tune mix while connected to running game
+Cross-platform performance,Built-in compression formats,Profile with FMOD performance tools
