@@ -5,31 +5,35 @@ Sound engineering stack for game development:
 1. **Audio Engine** — mixing, spatialization, dynamic soundscapes
 2. **Dynamic Mixer** — player-action priority, environment scaling, arena crowd, adaptive EQ
 3. **EchoForge (Unity)** — live crowd-mic RMS, noise gate, and in-scene adaptive mix
-4. **Integration Layer** — Unity + Unreal plugins that post *events*, not files
-5. **Broadcast Layer** — separate esports mix (commentary + crowd + ducked game)
-6. **Testing Suite** — latency, clarity, positional accuracy, dynamic-mix contracts
+4. **FMOD Adaptive Mixing** — Studio events, global parameters, snapshots, DSP driven by live game data
+5. **Integration Layer** — Unity + Unreal plugins that post *events*, not files
+6. **Broadcast Layer** — separate esports mix (commentary + crowd + ducked game)
+7. **Testing Suite** — latency, clarity, positional accuracy, dynamic-mix contracts
 
 Docs:
 
-- [docs/GDD.md](docs/GDD.md) — game design document (audio)
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — module boundaries and bus graph
-- [docs/DYNAMIC_MIXING.md](docs/DYNAMIC_MIXING.md) — adaptive mix design
+- [docs/GDD.md](docs/GDD.md)
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [docs/DYNAMIC_MIXING.md](docs/DYNAMIC_MIXING.md)
+- [docs/FMOD_ADAPTIVE_MIXING.md](docs/FMOD_ADAPTIVE_MIXING.md)
 
 ## Layout
 
 ```
-data/events.json                                shared event catalogue (includes priority tags)
-engine/audio_engine.py                          reference mixer + spatializer
-engine/dynamic_mixer.py                         action / environment / crowd / EQ controller
-src/audio_engine/Unity/EchoForgeAudioEngine.cs  Unity EchoForge adaptive mixer + noise gate
-broadcast/broadcast_mixer.py                    stream stem
-integration/unity/                              C# AudioApi + bridge
-integration/unreal/                             AudioEventSubsystem
-tests/test_audio.py                             latency / spatial / broadcast
-tests/test_dynamic_mix.py                       dynamic mixing contracts
+data/events.json
+engine/audio_engine.py
+engine/dynamic_mixer.py
+src/audio_engine/Unity/EchoForgeAudioEngine.cs
+integration/fmod/fmod_events.json
+integration/fmod/unity/FmodAudioManager.cs
+integration/fmod/unreal/FmodAudioSubsystem.*
+broadcast/broadcast_mixer.py
+integration/unity/
+integration/unreal/
+tests/
 ```
 
-The Python engine is a **reference implementation** so the contract can run and be tested without Unity/Unreal. Production games keep the same event ids and swap the renderer for native mixer, FMOD, or Wwise.
+The Python engine is a **reference implementation**. Production titles keep the same event ids and swap the renderer for native mixer, FMOD, or Wwise.
 
 ## Run tests
 
@@ -38,53 +42,39 @@ python3 tests/test_audio.py
 python3 tests/test_dynamic_mix.py
 ```
 
-## Gameplay usage
+## FMOD Adaptive Mixing
+
+Designers author Events, Parameters, Snapshots and DSP in FMOD Studio. Programmers call a small API.
+
+- Guide: [docs/FMOD_ADAPTIVE_MIXING.md](docs/FMOD_ADAPTIVE_MIXING.md)
+- Event / parameter map: [integration/fmod/fmod_events.json](integration/fmod/fmod_events.json)
+- Unity manager (includes `InitializeFmod`): [integration/fmod/unity/FmodAudioManager.cs](integration/fmod/unity/FmodAudioManager.cs)
+- Unreal subsystem: [integration/fmod/unreal/FmodAudioSubsystem.h](integration/fmod/unreal/FmodAudioSubsystem.h)
 
 ```csharp
-AudioApi.Post("sfx.footstep", pieceTransform);
-AudioApi.SetRtpc("intensity", 0.7f);
-AudioApi.IngestCrowdMic(0.55f);
-AudioApi.SetDevice("headset");
-AudioApi.SetSnapshot("arena_hot");
+FmodAudioManager.Instance.InitializeFmod();
+FmodAudioManager.Instance.SetIntensity(0.7f);
+FmodAudioManager.Instance.IngestCrowdMic(0.55f);
+FmodAudioManager.Instance.Post("sfx.gunfire", muzzle);
+FmodAudioManager.Instance.SetSnapshot("broadcast_focus");
 ```
 
-```cpp
-UAudioEventSubsystem::PostAudioEvent(this, "sfx.footstep", Options);
-```
+Strategy:
 
-```python
-from engine.audio_engine import AudioEngine, Vec3
-eng = AudioEngine(device="headset")
-eng.set_rtpc("intensity", 0.7)
-eng.ingest_crowd_mic(0.55)
-eng.post("sfx.footstep", Vec3(2, 0, 1))
-left, right, stems = eng.render_block()
-print(eng.dynamic.last_report)
-```
+1. Create Events for gunfire, crowd ambience, announcer VO, footsteps, music beds.
+2. Define global Parameters: `intensity`, `crowd_volume`, `player_health`, `commentary_active`.
+3. Link them in Studio — music tempo vs intensity, crowd ducks commentary, snapshots own DSP.
+4. Integrate the official Unity / Unreal FMOD plugin and initialize from the audio manager.
 
 ## Dynamic Mixing Module
 
-Core contract: [engine/dynamic_mixer.py](engine/dynamic_mixer.py) and [docs/DYNAMIC_MIXING.md](docs/DYNAMIC_MIXING.md).
+- [engine/dynamic_mixer.py](engine/dynamic_mixer.py)
+- [src/audio_engine/Unity/EchoForgeAudioEngine.cs](src/audio_engine/Unity/EchoForgeAudioEngine.cs)
 
-Unity scene hook (EchoForge): [src/audio_engine/Unity/EchoForgeAudioEngine.cs](src/audio_engine/Unity/EchoForgeAudioEngine.cs)
-
-EchoForge does three jobs every frame:
-
-1. **Crowd mic analysis** — RMS of `crowdMicInput` with faster attack than release, plus a short `cheer` transient.
-2. **Adaptive mix** — lowers ambient / master beds as crowd rises, boosts `PriorityCue` sources, keeps a game-gain floor.
-3. **Noise cancellation** — hysteresis gate mutes the mic when the room is just HVAC / PA hiss (`noiseThreshold`).
-
-It also forwards the smoothed crowd envelope to `AudioApi.IngestCrowdMic` and `SetRtpc("intensity", ...)` so the reference mixer and any Wwise/FMOD mapping stay aligned.
-
-- **Player-action sensitivity** — footsteps, gunfire, spells, reloads raise `action_heat` and get a priority boost so they are not masked.
-- **Environmental adaptation** — rain / wind / hall beds scale down as scene intensity and heat rise.
-- **Esports crowd** — live mic RMS balances crowd vs game with a gain floor.
-- **Priority layering** — `critical` voices are steal-protected and lifted against loud beds.
-- **Real-time EQ** — headset vs PA vs laptop presets plus sidechain compression on beds.
+EchoForge can feed `crowd_volume` / `intensity` into FMOD via `FmodAudioManager.IngestCrowdMic`.
 
 ## Broadcast
 
-`mix_broadcast(stems)` sidechains game + crowd to commentary and reports `clarity_db`.
-Send that stereo stem to OBS/vMix; do not reuse the player master.
+`mix_broadcast(stems)` sidechains game + crowd to commentary. Do not reuse the player master for OBS.
 
 Repo: https://github.com/UniCommunity/game-audio-engineering
