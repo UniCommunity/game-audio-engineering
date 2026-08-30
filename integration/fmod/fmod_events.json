@@ -1,0 +1,38 @@
+{
+  "renderer": "fmod_studio",
+  "banks": ["Master", "Master.strings"],
+  "parameters": {
+    "intensity": { "range": [0.0, 1.0], "scope": "global", "drives": ["music.tempo", "music.layers", "ambience.gain"] },
+    "crowd_volume": { "range": [0.0, 1.0], "scope": "global", "drives": ["crowd.gain", "commentary.sidechain"] },
+    "player_health": { "range": [0.0, 1.0], "scope": "global", "drives": ["sfx.lpf", "heartbeat.presence"] },
+    "commentary_active": { "range": [0.0, 1.0], "scope": "global", "drives": ["snapshot.broadcast_focus"] }
+  },
+  "snapshots": {
+    "normal": "snapshot:/normal",
+    "check": "snapshot:/check",
+    "victory": "snapshot:/victory",
+    "broadcast_focus": "snapshot:/broadcast_focus",
+    "arena_hot": "snapshot:/arena_hot"
+  },
+  "events": {
+    "ui.click": "event:/ui/click",
+    "ui.error": "event:/ui/error",
+    "sfx.piece.select": "event:/sfx/piece/select",
+    "sfx.piece.move": "event:/sfx/piece/move",
+    "sfx.piece.capture": "event:/sfx/piece/capture",
+    "sfx.check": "event:/sfx/check",
+    "sfx.mate": "event:/sfx/mate",
+    "sfx.footstep": "event:/sfx/footstep",
+    "sfx.gunfire": "event:/sfx/gunfire",
+    "sfx.reload": "event:/sfx/reload",
+    "sfx.spell.cast": "event:/sfx/spell/cast",
+    "vo.announce.check": "event:/vo/announce/check",
+    "music.state.explore": "event:/music/state/explore",
+    "ambience.hall": "event:/ambience/hall",
+    "ambience.rain": "event:/ambience/rain",
+    "ambience.wind": "event:/ambience/wind",
+    "crowd.cheer": "event:/crowd/cheer",
+    "crowd.live": "event:/crowd/live",
+    "broadcast.comment.play": "event:/broadcast/comment/play"
+  }
+}
