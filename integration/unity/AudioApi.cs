@@ -22,6 +22,8 @@ namespace AudioKit
         }
         public static void SetRtpc(string name, float value) => AudioEventBridge.Instance?.SetRtpc(name, value);
         public static void SetSnapshot(string name, float fadeMs = 50f) => AudioEventBridge.Instance?.SetSnapshot(name, fadeMs);
+        public static void IngestCrowdMic(float rms) => AudioEventBridge.Instance?.IngestCrowdMic(rms);
+        public static void SetDevice(string device) => AudioEventBridge.Instance?.SetDevice(device);
     }
 
     public class AudioEventBridge : MonoBehaviour
@@ -37,5 +39,7 @@ namespace AudioKit
         public void Dispatch(string eventId, AudioEventOptions opt) { }
         public void SetRtpc(string name, float value) { }
         public void SetSnapshot(string name, float fadeMs) { }
+        public void IngestCrowdMic(float rms) { }
+        public void SetDevice(string device) { }
     }
 }

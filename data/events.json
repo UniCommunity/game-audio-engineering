@@ -7,20 +7,28 @@
     "normal": { "music": 0.0, "sfx": 0.0, "dialogue": 0.0 },
     "check": { "music": -2.0, "sfx": 1.5 },
     "victory": { "music": 2.0, "sfx": -1.0 },
-    "broadcast_focus": { "music": -8.0, "sfx": -4.0, "crowd": -2.0, "commentary": 2.0 }
+    "broadcast_focus": { "music": -8.0, "sfx": -4.0, "crowd": -2.0, "commentary": 2.0 },
+    "arena_hot": { "music": -6.0, "ambience": -8.0, "sfx": 2.0, "crowd": 1.5 }
   },
   "events": {
-    "ui.click": { "bus": "ui", "gain_db": -12, "spatial": false, "synth": "click" },
-    "ui.error": { "bus": "ui", "gain_db": -8, "spatial": false, "synth": "error" },
-    "sfx.piece.select": { "bus": "sfx", "gain_db": -10, "spatial": true, "synth": "tick" },
-    "sfx.piece.move": { "bus": "sfx", "gain_db": -8, "spatial": true, "synth": "wood" },
-    "sfx.piece.capture": { "bus": "sfx", "gain_db": -4, "spatial": true, "synth": "hit" },
-    "sfx.check": { "bus": "sfx", "gain_db": -2, "spatial": false, "synth": "sting" },
-    "sfx.mate": { "bus": "sfx", "gain_db": 0, "spatial": false, "synth": "fanfare" },
-    "vo.announce.check": { "bus": "dialogue", "gain_db": -6, "spatial": false, "synth": "voice" },
-    "music.state.explore": { "bus": "music", "gain_db": -16, "spatial": false, "loop": true, "synth": "pad" },
-    "ambience.hall": { "bus": "ambience", "gain_db": -22, "spatial": false, "loop": true, "synth": "noise" },
-    "crowd.cheer": { "bus": "crowd", "gain_db": -10, "spatial": false, "synth": "cheer" },
-    "broadcast.comment.play": { "bus": "commentary", "gain_db": -4, "spatial": false, "synth": "voice" }
+    "ui.click": { "bus": "ui", "gain_db": -12, "spatial": false, "synth": "click", "priority": "medium" },
+    "ui.error": { "bus": "ui", "gain_db": -8, "spatial": false, "synth": "error", "priority": "high" },
+    "sfx.piece.select": { "bus": "sfx", "gain_db": -10, "spatial": true, "synth": "tick", "priority": "medium" },
+    "sfx.piece.move": { "bus": "sfx", "gain_db": -8, "spatial": true, "synth": "wood", "priority": "medium" },
+    "sfx.piece.capture": { "bus": "sfx", "gain_db": -4, "spatial": true, "synth": "hit", "priority": "high" },
+    "sfx.check": { "bus": "sfx", "gain_db": -2, "spatial": false, "synth": "sting", "priority": "high" },
+    "sfx.mate": { "bus": "sfx", "gain_db": 0, "spatial": false, "synth": "fanfare", "priority": "high" },
+    "sfx.footstep": { "bus": "sfx", "gain_db": -9, "spatial": true, "synth": "tick", "priority": "critical" },
+    "sfx.gunfire": { "bus": "sfx", "gain_db": -2, "spatial": true, "synth": "hit", "priority": "high" },
+    "sfx.reload": { "bus": "sfx", "gain_db": -6, "spatial": true, "synth": "wood", "priority": "critical" },
+    "sfx.spell.cast": { "bus": "sfx", "gain_db": -5, "spatial": true, "synth": "sting", "priority": "high" },
+    "vo.announce.check": { "bus": "dialogue", "gain_db": -6, "spatial": false, "synth": "voice", "priority": "high" },
+    "music.state.explore": { "bus": "music", "gain_db": -16, "spatial": false, "loop": true, "synth": "pad", "priority": "bed" },
+    "ambience.hall": { "bus": "ambience", "gain_db": -22, "spatial": false, "loop": true, "synth": "noise", "priority": "bed" },
+    "ambience.rain": { "bus": "ambience", "gain_db": -20, "spatial": false, "loop": true, "synth": "noise", "priority": "low" },
+    "ambience.wind": { "bus": "ambience", "gain_db": -24, "spatial": false, "loop": true, "synth": "noise", "priority": "low" },
+    "crowd.cheer": { "bus": "crowd", "gain_db": -10, "spatial": false, "synth": "cheer", "priority": "low" },
+    "crowd.live": { "bus": "crowd", "gain_db": -8, "spatial": false, "loop": true, "synth": "cheer", "priority": "low" },
+    "broadcast.comment.play": { "bus": "commentary", "gain_db": -4, "spatial": false, "synth": "voice", "priority": "critical" }
   }
 }
