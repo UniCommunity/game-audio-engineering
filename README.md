@@ -2,7 +2,7 @@
 
 Sound engineering stack for game development and esports: named events, adaptive mixing, FMOD on Unity / Unreal / Godot, a separate broadcast stem, and tests that treat clarity as a regression.
 
-**Executive summary:** [docs/EXECUTIVE_SUMMARY.md](docs/EXECUTIVE_SUMMARY.md)
+**summary:** [docs/SUMMARY.md](docs/SUMMARY.md)
 
 ## Layers
 
