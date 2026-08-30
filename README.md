@@ -16,7 +16,7 @@ Sound engineering stack for game development and esports: named events, adaptive
 
 ## Docs
 
-- [docs/EXECUTIVE_SUMMARY.md](docs/EXECUTIVE_SUMMARY.md) — stack overview mapped to this repo
+- [docs/SUMMARY.md](docs/SUMMARY.md) — stack overview mapped to this repo
 - [docs/GDD.md](docs/GDD.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/DYNAMIC_MIXING.md](docs/DYNAMIC_MIXING.md)
