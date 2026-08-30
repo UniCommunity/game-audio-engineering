@@ -1,4 +1,4 @@
-# Executive Summary — Sound Engineering Stack for Game Development and Esports
+# Summary — Sound Engineering Stack for Game Development and Esports
 
 A modern game-audio stack has to do two jobs that used to fight each other: **immersion** for players and **intelligibility** for competitors and broadcast. This kit treats those as one control problem. Gameplay posts named events. A reference mixer, EchoForge, and FMOD/Wwise-style middleware share the same ids. The player master and the esports stem are different sums.
 
