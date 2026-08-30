@@ -4,9 +4,10 @@ Sound engineering stack for game development:
 
 1. **Audio Engine** — mixing, spatialization, dynamic soundscapes
 2. **Dynamic Mixer** — player-action priority, environment scaling, arena crowd, adaptive EQ
-3. **Integration Layer** — Unity + Unreal plugins that post *events*, not files
-4. **Broadcast Layer** — separate esports mix (commentary + crowd + ducked game)
-5. **Testing Suite** — latency, clarity, positional accuracy, dynamic-mix contracts
+3. **EchoForge (Unity)** — live crowd-mic RMS, noise gate, and in-scene adaptive mix
+4. **Integration Layer** — Unity + Unreal plugins that post *events*, not files
+5. **Broadcast Layer** — separate esports mix (commentary + crowd + ducked game)
+6. **Testing Suite** — latency, clarity, positional accuracy, dynamic-mix contracts
 
 Docs:
 
@@ -17,14 +18,15 @@ Docs:
 ## Layout
 
 ```
-data/events.json              shared event catalogue (includes priority tags)
-engine/audio_engine.py        reference mixer + spatializer
-engine/dynamic_mixer.py       action / environment / crowd / EQ controller
-broadcast/broadcast_mixer.py  stream stem
-integration/unity/            C# AudioApi + bridge
-integration/unreal/           AudioEventSubsystem
-tests/test_audio.py           latency / spatial / broadcast
-tests/test_dynamic_mix.py     dynamic mixing contracts
+data/events.json                                shared event catalogue (includes priority tags)
+engine/audio_engine.py                          reference mixer + spatializer
+engine/dynamic_mixer.py                         action / environment / crowd / EQ controller
+src/audio_engine/Unity/EchoForgeAudioEngine.cs  Unity EchoForge adaptive mixer + noise gate
+broadcast/broadcast_mixer.py                    stream stem
+integration/unity/                              C# AudioApi + bridge
+integration/unreal/                             AudioEventSubsystem
+tests/test_audio.py                             latency / spatial / broadcast
+tests/test_dynamic_mix.py                       dynamic mixing contracts
 ```
 
 The Python engine is a **reference implementation** so the contract can run and be tested without Unity/Unreal. Production games keep the same event ids and swap the renderer for native mixer, FMOD, or Wwise.
@@ -60,15 +62,25 @@ left, right, stems = eng.render_block()
 print(eng.dynamic.last_report)
 ```
 
-## Dynamic mixing (short)
+## Dynamic Mixing Module
+
+Core contract: [engine/dynamic_mixer.py](engine/dynamic_mixer.py) and [docs/DYNAMIC_MIXING.md](docs/DYNAMIC_MIXING.md).
+
+Unity scene hook (EchoForge): [src/audio_engine/Unity/EchoForgeAudioEngine.cs](src/audio_engine/Unity/EchoForgeAudioEngine.cs)
+
+EchoForge does three jobs every frame:
+
+1. **Crowd mic analysis** — RMS of `crowdMicInput` with faster attack than release, plus a short `cheer` transient.
+2. **Adaptive mix** — lowers ambient / master beds as crowd rises, boosts `PriorityCue` sources, keeps a game-gain floor.
+3. **Noise cancellation** — hysteresis gate mutes the mic when the room is just HVAC / PA hiss (`noiseThreshold`).
+
+It also forwards the smoothed crowd envelope to `AudioApi.IngestCrowdMic` and `SetRtpc("intensity", ...)` so the reference mixer and any Wwise/FMOD mapping stay aligned.
 
 - **Player-action sensitivity** — footsteps, gunfire, spells, reloads raise `action_heat` and get a priority boost so they are not masked.
 - **Environmental adaptation** — rain / wind / hall beds scale down as scene intensity and heat rise.
-- **Esports crowd** — live mic RMS balances crowd vs game with a 0.45 game-gain floor.
+- **Esports crowd** — live mic RMS balances crowd vs game with a gain floor.
 - **Priority layering** — `critical` voices are steal-protected and lifted against loud beds.
 - **Real-time EQ** — headset vs PA vs laptop presets plus sidechain compression on beds.
-
-Details: [docs/DYNAMIC_MIXING.md](docs/DYNAMIC_MIXING.md)
 
 ## Broadcast
 
