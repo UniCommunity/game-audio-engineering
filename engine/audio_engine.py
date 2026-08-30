@@ -1,9 +1,10 @@
-"""Reference audio engine: events, voices, spatialization, buses, soundscapes."""
+"""Reference audio engine: events, voices, spatialization, buses, dynamic mix."""
 from __future__ import annotations
 import json, math
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
+from engine.dynamic_mixer import DynamicMixer
 
 SAMPLE_RATE, BLOCK, VOICE_CAP = 48000, 256, 32
 SPEED_OF_SOUND, HEAD_RADIUS = 343.0, 0.09
@@ -57,7 +58,8 @@ class Synth:
 @dataclass
 class Voice:
     event: str; bus: str; synth: str; gain: float; spatial: bool
-    position: Vec3; loop: bool; t: float = 0.0; alive: bool = True; age: float = 0.0; protect: bool = False
+    position: Vec3; loop: bool; t: float = 0.0; alive: bool = True; age: float = 0.0
+    protect: bool = False; priority: str = "medium"
     def tick(self, n, sr):
         buf = Synth.render(self.synth, n, sr, self.t)
         self.t += n/sr; self.age += n/sr
@@ -107,12 +109,14 @@ class SoundscapeDirector:
         self.current=name
         if name.endswith("opening") or name.endswith("calm"):
             self.engine.post("ambience.hall"); self.engine.post("music.state.explore")
-        if "hot" in name: self.engine.set_rtpc("intensity", 0.85)
+        if "hot" in name:
+            self.engine.set_rtpc("intensity", 0.85)
+            self.engine.set_snapshot("arena_hot")
     def set_intensity(self, v):
         self.intensity=clamp(v,0,1); self.engine.set_rtpc("intensity", self.intensity)
 
 class AudioEngine:
-    def __init__(self, catalog_path=None, sr=SAMPLE_RATE, block=BLOCK):
+    def __init__(self, catalog_path=None, sr=SAMPLE_RATE, block=BLOCK, device="headset"):
         self.sr, self.block = sr, block
         path = catalog_path or str(Path(__file__).resolve().parents[1]/"data"/"events.json")
         self.catalog = json.loads(Path(path).read_text())
@@ -121,6 +125,7 @@ class AudioEngine:
         self.buses={n:Bus(n) for n in self.catalog["buses"]}
         self.snapshot="normal"; self.soundscape=SoundscapeDirector(self)
         self.frames_rendered=0; self.last_event_sample={}
+        self.dynamic = DynamicMixer(device=device)
         self.apply_snapshot("normal", 0)
     def post(self, event, position=None):
         self.queue.append(Command("play", event=event, position=position or Vec3()))
@@ -131,6 +136,10 @@ class AudioEngine:
     def set_listener(self, position, forward=None):
         self.listener.position=position
         if forward: self.listener.forward=forward
+    def set_device(self, device):
+        self.dynamic.set_device(device)
+    def ingest_crowd_mic(self, rms):
+        self.dynamic.ingest_crowd_mic(rms)
     def apply_snapshot(self, name, _fade):
         spec=self.catalog.get("snapshots",{}).get(name,{})
         self.snapshot=name
@@ -141,22 +150,29 @@ class AudioEngine:
         if len(live)<int(self.catalog.get("voice_cap", VOICE_CAP)): return
         victims=[v for v in live if not v.protect]
         if victims:
-            victims.sort(key=lambda v: v.age, reverse=True); victims[0].alive=False
+            victims.sort(key=lambda v: (1 if v.priority == "critical" else 0, -v.age))
+            victims[0].alive = False
     def _consume(self):
         while self.queue:
             cmd=self.queue.pop(0)
-            if cmd.kind=="rtpc": self.rtpcs[cmd.rtpc]=cmd.value
+            if cmd.kind=="rtpc":
+                self.rtpcs[cmd.rtpc]=cmd.value
+                if cmd.rtpc=="intensity":
+                    self.dynamic.set_scene_intensity(cmd.value)
             elif cmd.kind=="snapshot": self.apply_snapshot(cmd.snapshot, cmd.fade_ms)
             elif cmd.kind=="play":
                 spec=self.catalog["events"].get(cmd.event)
                 if not spec: continue
                 self._steal_if_needed()
+                priority = spec.get("priority", "medium")
+                protect = spec["bus"] in ("dialogue","commentary") or priority=="critical"
                 self.voices.append(Voice(cmd.event, spec["bus"], spec.get("synth","tick"),
                     db_to_lin(spec.get("gain_db",0.0)), bool(spec.get("spatial")),
                     cmd.position or Vec3(), bool(spec.get("loop")),
-                    protect=spec["bus"] in ("dialogue","commentary")))
+                    protect=protect, priority=priority))
+                self.dynamic.register_action(cmd.event, priority)
                 self.last_event_sample[cmd.event]=self.frames_rendered
-    def render_block(self):
+    def render_block(self, apply_dynamic=True):
         self._consume(); n=self.block
         for b in self.buses.values(): b.clear(n)
         still=[]
@@ -168,12 +184,18 @@ class AudioEngine:
             if v.alive: still.append(v)
         self.voices=still
         self.buses["music"].snapshot_db += -6.0*self.rtpcs.get("intensity",0.0)
-        ml,mr=[0.0]*n,[0.0]*n; stems={}
+        stems={}
         for name,bus in self.buses.items():
             if name=="master": continue
             stems[name]=(bus.left[:], bus.right[:])
-            for i in range(n):
-                ml[i]+=bus.left[i]; mr[i]+=bus.right[i]
+        if apply_dynamic:
+            ml, mr, _report = self.dynamic.mix_stems(stems)
+        else:
+            ml,mr=[0.0]*n,[0.0]*n
+            for name,bus in self.buses.items():
+                if name=="master": continue
+                for i in range(n):
+                    ml[i]+=bus.left[i]; mr[i]+=bus.right[i]
         peak=max(1e-9, max(abs(x) for x in ml+mr))
         if peak>0.99:
             s=0.99/peak; ml=[x*s for x in ml]; mr=[x*s for x in mr]
