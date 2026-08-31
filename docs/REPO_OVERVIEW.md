@@ -1,4 +1,4 @@
-# Repository overview — expanded
+# Repository overview
 
 ## What this is
 A concise, practical sound-engineering kit that unifies player-facing immersion and broadcast intelligibility for multiplayer games and esports. It provides: a Python reference audio engine and adaptive dynamic mixer (used as an oracle and test harness), engine-agnostic integration layers that post named events and RTPCs to FMOD (Unity, Unreal, Godot), and a broadcast stem/mixer so commentary and crowd can be produced without losing clarity.
@@ -75,11 +75,3 @@ FmodAudioManager.Instance.Post("sfx.gunfire", muzzle);
 
 - The broadcast mixer is a Python module (broadcast/broadcast_mixer.py). Running it requires the same stem inputs or simulated stems; tests report a clarity metric (clarity_db) the repo treats as a regression threshold.
 
-## Notes on missing pieces / requirements
-- FMOD banks and project files are not included — to fully run platform integrations you'll need the FMOD Studio project and exported banks.
-- If you want a live designer dashboard or automated model-driven RTPCs (ML), the docs mention them as specified but not shipped.
-
-## Try asking
-- "Can you add a short example that runs engine/dynamic_mixer.py with synthesized stems and prints the last_report structure?"
-- "Where does broadcast/broadcast_mixer.py compute clarity_db — can you add a unit test that fails when clarity_db < 6 dB?"
-- "Can you show me how the Unity AudioApi maps event ids to integration/fmod/fmod_events.json (which file does that mapping live in)?"
