@@ -56,8 +56,6 @@ Repo: https://github.com/UniCommunity/game-audio-engineering
 
 - The Fusion Problem: Interactive audio (in-engine, low latency, event-driven) and broadcast audio (linear, production-mixed, often hardware-assisted) have different control surfaces, latency expectations, and toolchains. Treating them as a single undifferentiated layer risks leaking implementation details between teams and encourages fragile coupling (e.g., trying to run a broadcast console inside a game engine).
 - Clear contracts (event lists, RTPCs, stems) enable independent authoring and testing: designers can author events and parameters for the in-game experience; broadcast engineers can consume stems and RTPC-driven metadata to build a show mix.
-
-EchoForge naming and scope
 - "EchoForge" reads as a project-specific name (and is implemented here as a Unity runtime hook). It is not a standard middleware name like FMOD or Wwise. Keep EchoForge in the repo as an example runtime hook (see `src/audio_engine/Unity/EchoForgeAudioEngine.cs`), but document it as a local implementation example rather than an alternative middleware. For external-facing documentation, prefer neutral terms such as "Engine runtime hook" or "Unity adaptive mixer example" so readers do not assume a separate commercial product.
 
 Dual-Pipeline architecture 
