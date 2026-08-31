@@ -53,16 +53,14 @@ Repo: https://github.com/UniCommunity/game-audio-engineering
 
 ## Maintainer note — architecture clarification and recommended changes
 
-Thanks for building a comprehensive kit. To align this README with industry practice and make the repository clearer for both game audio engineers and broadcast/production teams, I recommend the following elaboration and a small reorganization of the conceptual "Layers" into two connected but distinct pipelines: the Interactive Gameplay Audio Pipeline (the game) and the Esports Broadcast & Venue Pipeline (the show). This keeps responsibilities, latency budgets, and tooling boundaries explicit.
 
-Why separate the pipelines
 - The Fusion Problem: Interactive audio (in-engine, low latency, event-driven) and broadcast audio (linear, production-mixed, often hardware-assisted) have different control surfaces, latency expectations, and toolchains. Treating them as a single undifferentiated layer risks leaking implementation details between teams and encourages fragile coupling (e.g., trying to run a broadcast console inside a game engine).
 - Clear contracts (event lists, RTPCs, stems) enable independent authoring and testing: designers can author events and parameters for the in-game experience; broadcast engineers can consume stems and RTPC-driven metadata to build a show mix.
 
 EchoForge naming and scope
 - "EchoForge" reads as a project-specific name (and is implemented here as a Unity runtime hook). It is not a standard middleware name like FMOD or Wwise. Keep EchoForge in the repo as an example runtime hook (see `src/audio_engine/Unity/EchoForgeAudioEngine.cs`), but document it as a local implementation example rather than an alternative middleware. For external-facing documentation, prefer neutral terms such as "Engine runtime hook" or "Unity adaptive mixer example" so readers do not assume a separate commercial product.
 
-Recommended Dual-Pipeline architecture (concise)
+Dual-Pipeline architecture 
 1) Interactive Gameplay Audio Pipeline (The Game)
 - Integration & API Layer: engine-specific scripts/plugins that post event IDs and RTPCs (Unity C#, Unreal, Godot GDScript). These should not embed broadcast-specific routing.
 - Audio Engine & Middleware: FMOD/Wwise handling events, RTPC-driven DSP, snapshots, and internal routing.
@@ -88,4 +86,4 @@ References and further reading
 - Stevens & Raybould — "Principles of Game Audio" for interactive vs. linear mixing theory.
 - AES papers on esports audio — for venue mic arrays, crowd processing and broadcast mixing challenges.
 
-If you want, I can insert a new subsection under "Layers" that instantiates the two pipelines and the shared contract (with short examples of the contract payload the game should emit for broadcast). I can also update docs/SUMMARY.md and docs/ARCHITECTURE.md to reflect this separation and add a small example script that creates stems and demonstrates how the Python oracle and broadcast mixer would consume them.
+
