@@ -51,7 +51,7 @@ Repo: https://github.com/UniCommunity/game-audio-engineering
 
 ---
 
-## Maintainer note — architecture clarification and recommended changes
+## Preliminary Framework
 
 
 - The Fusion Problem: Interactive audio (in-engine, low latency, event-driven) and broadcast audio (linear, production-mixed, often hardware-assisted) have different control surfaces, latency expectations, and toolchains. Treating them as a single undifferentiated layer risks leaking implementation details between teams and encourages fragile coupling (e.g., trying to run a broadcast console inside a game engine).
@@ -76,10 +76,7 @@ Dual-Pipeline architecture
 - Shared Integration Layer (contract): an explicit contract (events.json + fmod_events.json) that defines event names, parameters and snapshot exposures which both pipelines use.
 - Unified Quality & Testing Suite: signal-level tests (latency, clarity_db, LUFS compliance), automated regression thresholds and per-block mixer reports. These live in `tests/` and are exercised by the Python oracle (`engine/audio_engine.py`).
 
-Practical next steps for the repo
-- Mark EchoForge as an example Unity runtime hook in the README and docs (link to `src/audio_engine/Unity/EchoForgeAudioEngine.cs`).
-- Add a short "How the pipelines connect" section that explains the expected artifact the game emits for broadcast (stereo stems: game, crowd, commentary + RTPC metadata) and how broadcast ingestion should treat them.
-- Add a short compliance note pointing to LUFS/LKFS monitoring and target levels for streaming vs. TV.
+
 
 References and further reading
 - FMOD Studio docs / Wwise documentation — for middleware mapping and studio-side mixer best practices.
