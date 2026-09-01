@@ -1,0 +1,45 @@
+{
+  "generators": [
+    {
+      "engine": "unity",
+      "template": "templates/unity/AudioApi.cs.tpl",
+      "out_dir": "engine_integrations/unity/Scripts",
+      "file_ext": ".cs",
+      "manifest_key": "unity"
+    },
+    {
+      "engine": "godot",
+      "template": "templates/godot/FmodAudio.gd.tpl",
+      "out_dir": "engine_integrations/godot/scripts",
+      "file_ext": ".gd",
+      "manifest_key": "godot"
+    },
+    {
+      "engine": "unreal",
+      "template": "templates/unreal/header.h.tpl",
+      "out_dir": "engine_integrations/unreal/Source",
+      "file_ext": ".h",
+      "manifest_key": "unreal"
+    },
+    {
+      "engine": "gamemaker",
+      "template": "templates/gamemaker/wrapper.gml.tpl",
+      "out_dir": "engine_integrations/gamemaker/scripts",
+      "file_ext": ".gml",
+      "manifest_key": "gamemaker"
+    },
+    {
+      "engine": "rage",
+      "template": "templates/rage/header.h.tpl",
+      "out_dir": "engine_integrations/rage/include",
+      "file_ext": ".h",
+      "manifest_key": "rage"
+    }
+  ],
+  "defaults": {
+    "event_source": "data/events.json",
+    "fmod_map": "integration/fmod/fmod_events.json",
+    "author": "<YOUR_ORG>",
+    "license": "MIT"
+  }
+}
