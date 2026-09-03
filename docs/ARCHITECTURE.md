@@ -2,6 +2,46 @@
 
 Gameplay posts named events. Unity/Unreal translate them. The audio engine mixes and spatializes. The dynamic mixer rebalances every block. Broadcast is a second sum for streams.
 
+Resonance is the proposed **runtime foundation** under [Preliminary Framework](../README.md#preliminary-framework). See [RESONANCE.md](RESONANCE.md) for the public SDK overview.
+
+## Resonance design philosophy
+
+### What Resonance IS (The Foundation)
+
+- ✅ **Runtime audio engine** — Plays sounds in real-time during gameplay
+- ✅ **Voice manager** — Allocates and prioritizes audio voices
+- ✅ **DSP graph** — Real-time effect chains, filters, reverb, compression
+- ✅ **Spatial audio** — 3D positioning with HRTF for realistic audio
+- ✅ **Streaming I/O** — Efficient audio buffer and file management
+- ✅ **Cross-platform** — Single codebase, all platforms (Windows, macOS, Linux, iOS, Android, consoles)
+- ✅ **C API** — Minimal, stable interface with language-specific wrappers
+- ✅ **Genre-agnostic** — Works for shooters, open-world, racing, VR, stealth, puzzle games
+- ✅ **Performance-optimized** — <0.5ms voice allocation, <1ms DSP per frame
+
+### What Resonance IS NOT (Excluded Scope)
+
+- ❌ **Authoring tool** — Does not compose, arrange, or edit audio. Use DAWs (Reaper, Cubase, Logic)
+- ❌ **Dialogue system** — Does not manage conversations or branching dialogue. Integrate external dialogue tools
+- ❌ **Music composition** — Does not create musical scores. Hire composers or use existing tracks
+- ❌ **Visual editor** — Does not have a drag-and-drop UI. Edit in your game engine
+- ❌ **Asset management** — Does not organize audio files or metadata. Manage files yourself
+- ❌ **Genre-specific middleware** — Not an "FPS audio engine" or "open-world audio engine". Build your own genre systems
+- ❌ **High-level abstraction** — Not a black box. You control every detail
+- ❌ **Feature-bloated** — Only includes what games need for real-time audio
+
+### You Build On Top (Your Responsibility)
+
+Games implement their own:
+
+- **Weapon audio system** — Gunshot effects, impact sounds, gun type variations
+- **Dialogue system** — NPC conversation management, branching dialogue
+- **Music system** — Dynamic music transitions, state-based music changes
+- **Ambient manager** — Handling 100+ simultaneous ambient sounds
+- **Voice chat integration** — Spatial voice communication (using Vivox, Discord, etc.)
+- **Game-specific audio logic** — How audio responds to game events
+
+Resonance sits under the interactive gameplay pipeline. It does not own broadcast consoles, DAW authoring, or the shared event catalogue. Those remain in this kit (`data/events.json`, `broadcast/`, `integration/`).
+
 ## Game Audio Middleware (diagram)
 
 [![Game Audio Middleware — Authoring → Runtime → Show](assets/middleware_overview_thumb.png)](assets/middleware_overview_v3.svg)
